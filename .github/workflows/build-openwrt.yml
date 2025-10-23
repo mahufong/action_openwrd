@@ -33,6 +33,21 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+    - name: Maximize build space # 步骤1：最大化构建空间
+      uses: easimon/maximize-build-space-action@v7
+      with:
+          # 以下是一些常用配置项
+        root-reserve-mb: 512       # 在根分区保留 512MB 空间，防止系统因空间完全耗尽而崩溃
+        swap-size-mb: 1024         # 创建一个 1GB 的交换文件，对内存密集型编译有帮助
+        remove-dotnet: 'true'      # 移除 .NET SDK (能释放大量空间)
+        remove-android: 'true'     # 移除 Android SDK 和 NDK (能释放大量空间)
+        remove-haskell: 'true'     # 移除 Haskell (GHC)
+        remove-go: 'true'
+        remove-swift: 'true'
+        remove-java: 'true'
+        remove-docker-images: 'true'
+          # 还有很多其他选项，比如 remove-swift, remove-go, remove-codeql 等
+          # 根据你的项目需求，把不需要的都设置为 'true'
     - name: Checkout
       uses: actions/checkout@main
 
