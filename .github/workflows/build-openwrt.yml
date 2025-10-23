@@ -34,7 +34,7 @@ jobs:
 
     steps:
     - name: Maximize build space # 步骤1：最大化构建空间
-      uses: easimon/maximize-build-space-action@v7
+      uses: easimon/maximize-build-space@master
       with:
           # 以下是一些常用配置项
         root-reserve-mb: 512       # 在根分区保留 512MB 空间，防止系统因空间完全耗尽而崩溃
