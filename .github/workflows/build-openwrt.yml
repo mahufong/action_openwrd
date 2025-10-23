@@ -42,9 +42,7 @@ jobs:
         remove-dotnet: 'true'      # 移除 .NET SDK (能释放大量空间)
         remove-android: 'true'     # 移除 Android SDK 和 NDK (能释放大量空间)
         remove-haskell: 'true'     # 移除 Haskell (GHC)
-        remove-go: 'true'
-        remove-swift: 'true'
-        remove-java: 'true'
+        remove-codeql: 'true'
         remove-docker-images: 'true'
           # 还有很多其他选项，比如 remove-swift, remove-go, remove-codeql 等
           # 根据你的项目需求，把不需要的都设置为 'true'
