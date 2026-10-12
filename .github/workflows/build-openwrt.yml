@@ -59,8 +59,10 @@ jobs:
 
       - name: Clone LEDE
         run: |
-          git clone --filter=blob:none "$REPO_URL" openwrt
+          mkdir openwrt
           cd openwrt
+          git init
+          git remote add origin "$REPO_URL"
           git fetch --depth 1 origin "$SOURCE_REF"
           git checkout --detach FETCH_HEAD
           echo "LEDE_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
