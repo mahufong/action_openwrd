@@ -32,6 +32,34 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
+
+      - name: Free runner disk space
+        run: |
+          echo "=== Disk space before cleanup ==="
+          df -hT
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          sudo apt-get clean
+          echo "=== Disk space after cleanup ==="
+          df -hT
+
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          # The action mounts the build LV on GITHUB_WORKSPACE, so it must run
+          # before checkout. Keep enough root space for apt/dpkg, runner logs
+          # and action runtimes.
+          root-reserve-mb: 12288
+          swap-size-mb: 2048
+          remove-dotnet: "false"
+          remove-android: "false"
+          remove-haskell: "false"
+          remove-codeql: "false"
+          remove-docker-images: "false"
+
       - name: Checkout build profile
         uses: actions/checkout@v4
 
@@ -39,26 +67,24 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo -E rm -rf /usr/share/dotnet /etc/mysql /etc/php /usr/local/lib/android
+          echo "=== Root space before dependency install ==="
+          df -hT /
           sudo -E apt-mark hold grub-efi-amd64-signed
           sudo -E apt-get update
-          sudo -E apt-get -y install             ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential             bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib             g++-multilib gettext genisoimage git gperf haveged help2man intltool libc6-dev-i386             libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev             libncurses5-dev libncursesw5-dev libnsl-dev libpython3-dev libreadline-dev libssl-dev             libtool llvm lrzsz msmtp ninja-build p7zip p7zip-full patch pkgconf python3             python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion             swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd xz-utils zlib1g-dev
+          sudo -E apt-get -y install \
+            ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
+            bzip2 ccache clang cmake cpio curl device-tree-compiler flex gawk gcc-multilib \
+            g++-multilib gettext genisoimage git gperf haveged help2man intltool libc6-dev-i386 \
+            libelf-dev libfuse-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev \
+            libncurses5-dev libncursesw5-dev libnsl-dev libpython3-dev libreadline-dev libssl-dev \
+            libtool llvm lrzsz ninja-build p7zip p7zip-full patch pkgconf python3 \
+            python3-pyelftools python3-setuptools qemu-utils rsync scons squashfs-tools subversion \
+            swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd xz-utils zlib1g-dev
+          sudo -E apt-get autoremove --purge -y
           sudo -E apt-get clean
+          echo "=== Root space after dependency install ==="
+          df -hT /
           sudo timedatectl set-timezone "$TZ"
-
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          # Install host dependencies first, then turn the remaining disk into
-          # the OpenWrt build volume. Keep enough root space for runner logs,
-          # action runtimes and temporary files.
-          root-reserve-mb: 8192
-          swap-size-mb: 2048
-          remove-dotnet: "true"
-          remove-android: "true"
-          remove-haskell: "true"
-          remove-codeql: "true"
-          remove-docker-images: "true"
 
       - name: Clone LEDE
         run: |
