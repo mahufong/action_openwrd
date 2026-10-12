@@ -1,6 +1,9 @@
 name: OpenWrt Builder
 
 on:
+  push:
+    branches:
+      - lede-2026-refresh
   repository_dispatch:
   workflow_dispatch:
     inputs:
