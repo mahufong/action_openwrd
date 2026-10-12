@@ -42,23 +42,11 @@ jobs:
           sudo rm -rf /opt/ghc
           sudo rm -rf /opt/hostedtoolcache/CodeQL
           sudo docker image prune --all --force || true
-          sudo apt-get clean
+          sudo -E apt-get -y purge azure-cli* ghc* zulu* firefox google-chrome* dotnet* powershell* openjdk* mysql* php* mongodb* || true
+          sudo -E apt-get -y autoremove --purge || true
+          sudo -E apt-get clean
           echo "=== Disk space after cleanup ==="
           df -hT
-
-      - name: Maximize build space
-        uses: easimon/maximize-build-space@master
-        with:
-          # The action mounts the build LV on GITHUB_WORKSPACE, so it must run
-          # before checkout. Keep enough root space for apt/dpkg, runner logs
-          # and action runtimes.
-          root-reserve-mb: 12288
-          swap-size-mb: 2048
-          remove-dotnet: "false"
-          remove-android: "false"
-          remove-haskell: "false"
-          remove-codeql: "false"
-          remove-docker-images: "false"
 
       - name: Checkout build profile
         uses: actions/checkout@v4
@@ -84,6 +72,10 @@ jobs:
           sudo -E apt-get clean
           echo "=== Root space after dependency install ==="
           df -hT /
+          avail_kb="$(df --output=avail -k / | tail -1 | tr -d ' ')"
+          if [ "$avail_kb" -lt 41943040 ]; then
+            echo "::warning::Less than 40 GiB free before LEDE build: $((avail_kb / 1024 / 1024)) GiB"
+          fi
           sudo timedatectl set-timezone "$TZ"
 
       - name: Clone LEDE
