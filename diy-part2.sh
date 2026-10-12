@@ -13,3 +13,14 @@ if [ -f "$ZT_MAKEFILE" ]; then
   sed -i 's/^PKG_RELEASE:=.*/PKG_RELEASE:=1/' "$ZT_MAKEFILE"
   sed -i 's/^PKG_HASH:=.*/PKG_HASH:=2c607f573c6e38815433af289d364a689a203b18b51125f06c4472014d0657f0/' "$ZT_MAKEFILE"
 fi
+
+
+# On this Unraid VM eth0 is a single-queue virtio_net NIC. Current netifd
+# packet-steering mode 2 means "use all CPUs", while Lean's autocore-x86 still
+# persists mode 1. Keep autocore's RPS setup and make the persisted UCI value
+# consistent so later network/firewall reloads do not collapse RX processing
+# back to one CPU.
+AUTOCORE_INIT="package/lean/autocore/files/x86/autocore"
+if [ -f "$AUTOCORE_INIT" ]; then
+  sed -i "s/network.@globals\[0\].packet_steering=1/network.@globals[0].packet_steering=2/" "$AUTOCORE_INIT"
+fi
